@@ -37,3 +37,4 @@ REM Run the program now
 STRING Start-Process "$env:APPDATA\solid_edge_setup.exe" -WindowStyle Hidden
 DELAY  1000
 STRING exit
+ENTER
