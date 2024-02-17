@@ -1,5 +1,5 @@
-# pyinstaller --onefile .\random_mouse.py
 # py -m pip install pyinstaller
+# pyinstaller --onefile .\random_mouse.py
 
 import random
 import time
@@ -71,6 +71,7 @@ def click_random_screen_btn(kill_evt):
       print("Getting lock for click")
       try:
          with move_lock:
+            # Todo: fix for stacked monitors
             if(action == 0):
                print(f"Screen {screen}: Exiting")
                mouse.position = (ORGIN_EXIT_BTN_X+monitor.x, SCREEN_BTNS_Y)
