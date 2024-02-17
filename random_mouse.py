@@ -81,8 +81,8 @@ def click_random_screen_btn(kill_evt):
                print(f"Screen {screen}: Minimizing")
                mouse.position = (ORGIN_MIN_BTN_X+monitor.x, SCREEN_BTNS_Y)
             
-            # mouse.press(Button.left)
-            # mouse.release(Button.left)
+            mouse.press(Button.left)
+            mouse.release(Button.left)
       except Exception:
          continue
 
