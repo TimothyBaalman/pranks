@@ -1,23 +1,28 @@
+# pyinstaller --onefile .\random_mouse.py
+# py -m pip install pyinstaller
+
 import random
 import time
 from pynput.mouse import Button, Controller
 from threading import Thread, Event, Lock
 import webbrowser
+from screeninfo import get_monitors
 
-WHOLE_RES_W = 3840-50
-WHOLE_RES_H = 1080-50
-
-SCREEN_1_EXIT_BTN_X = 1890
-SCREEN_1_EXPAND_BTN_X = 1847
-SCREEN_1_MIN_BTN_X = 1805
-
-SCREEN_2_EXIT_BTN_X = 3817
-SCREEN_2_EXPAND_BTN_X = 3770
-SCREEN_2_MIN_BTN_X = 3725
+ORGIN_EXIT_BTN_X = 1890
+ORGIN_EXPAND_BTN_X = 1847
+ORGIN_MIN_BTN_X = 1805
 
 SCREEN_BTNS_Y = 9
 
+# Get all monitors
+monitors = get_monitors()
+
 mouse = Controller()
+
+# Print the number of monitors and their resolutions
+print(f"Number of monitors: {len(monitors)}")
+for i, monitor in enumerate(monitors):
+   print(f"Monitor {i}: {monitor.width}x{monitor.height} at {monitor.x},{monitor.y}")
 
 move_lock = Lock()
 
@@ -27,12 +32,24 @@ def move_random(kill_evt):
       wait = random.randint(10, 30)
       time.sleep(wait)
 
-      x_pos = random.randint(0, WHOLE_RES_W)
-      y_pos = random.randint(0, WHOLE_RES_H)
+      screen = random.randint(0, len(monitors)-1)
+      monitor = monitors[screen]
+
+      if(monitor.x < 0):
+         x_pos = random.randint(monitor.x, 0)
+      else:
+         x_pos = random.randint(0, monitor.x)
+
+      y_meas = monitor.y+monitor.height
+      if(y_meas < 0):
+         y_pos = random.randint(y_meas, 0)
+      else:
+         y_pos = random.randint(0, y_meas)
 
       print("Getting lock for move")
       try:
          with move_lock:
+            print(f"Moving to Screen {screen}: {(x_pos, y_pos)}")
             mouse.position = (x_pos, y_pos)
       except Exception:
          continue
@@ -44,35 +61,34 @@ def click_random_screen_btn(kill_evt):
       wait = random.randint(30, 40)
       time.sleep(wait)
 
-      screen_target = random.randint(1,2)
-      action = random.randint(0, 2)
+      screen = random.randint(0, len(monitors)-1)
+      monitor = monitors[screen]
 
+      # action = random.randint(0, 2)
+      # Not doing exit now. Don't want to close rick rolls
+      action = random.randint(1, 2)
+      print(f"Action: {action}")
       print("Getting lock for click")
       try:
          with move_lock:
-            if(screen_target == 1):
-               if(action == 0):
-                  mouse.position = (SCREEN_1_EXIT_BTN_X, SCREEN_BTNS_Y)
-               elif(action == 1):
-                  mouse.position = (SCREEN_1_EXPAND_BTN_X, SCREEN_BTNS_Y)
-               else:
-                  mouse.position = (SCREEN_1_MIN_BTN_X, SCREEN_BTNS_Y)
+            if(action == 0):
+               print(f"Screen {screen}: Exiting")
+               mouse.position = (ORGIN_EXIT_BTN_X+monitor.x, SCREEN_BTNS_Y)
+            elif(action == 1):
+               print(f"Screen {screen}: Expanding")
+               mouse.position = (ORGIN_EXPAND_BTN_X+monitor.x, SCREEN_BTNS_Y)
             else:
-               if(action == 0):
-                  mouse.position = (SCREEN_2_EXIT_BTN_X, SCREEN_BTNS_Y)
-               elif(action == 1):
-                  mouse.position = (SCREEN_2_EXPAND_BTN_X, SCREEN_BTNS_Y)
-               else:
-                  mouse.position = (SCREEN_2_MIN_BTN_X, SCREEN_BTNS_Y)
+               print(f"Screen {screen}: Minimizing")
+               mouse.position = (ORGIN_MIN_BTN_X+monitor.x, SCREEN_BTNS_Y)
             
-            mouse.press(Button.left)
-            mouse.release(Button.left)
+            # mouse.press(Button.left)
+            # mouse.release(Button.left)
       except Exception:
          continue
 
 def do_rick_roll(kill_evt):
    while(not kill_evt.wait(1)):
-      wait = random.randint(180, 1200)
+      wait = random.randint(180, 600) # 3 mins to 10 mins
       time.sleep(wait)
 
       webbrowser.open('https://www.youtube.com/watch?v=eBGIQ7ZuuiU', new = 2)
